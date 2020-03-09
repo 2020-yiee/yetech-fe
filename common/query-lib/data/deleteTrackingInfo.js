@@ -1,11 +1,11 @@
 import { query, METHOD } from "../../query";
 import { API_URL, SERVICE } from "../../service";
 
-export const getWebOwner = ({ webOwnerId, email, token }) =>
+export const deleteTrackingInfo = ({ trackingId }) =>
   query({
-    method: METHOD.GET,
-    url: `${API_URL}/${SERVICE.WEB_OWNER}/api/web-owner`,
-    params: { webOwnerId: webOwnerId },
+    method: METHOD.POST,
+    url: `${API_URL}/${SERVICE.TRACKING}/api/tracking/info`,
+    params: { trackingId:trackingId},
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token

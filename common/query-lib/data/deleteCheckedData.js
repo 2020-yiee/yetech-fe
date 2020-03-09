@@ -1,11 +1,11 @@
 import { query, METHOD } from "../../query";
 import { API_URL, SERVICE } from "../../service";
 
-export const deleteTrackedInfo = ({ trackingId }) =>
+export const deleteCheckedData = ({ trackingId , token }) =>
   query({
-    method: METHOD.POST,
-    url: `${API_URL}/${SERVICE.TRACKING}/api/tracking/info`,
-    params: { trackingId:trackingId},
+    method: METHOD.DELETE,
+    url: `${API_URL}/${SERVICE.TRACKING}/api/tracking/data`,
+    data: { trackingId: trackingId },
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token

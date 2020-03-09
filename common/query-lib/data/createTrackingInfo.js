@@ -1,11 +1,11 @@
 import { query, METHOD } from "../../query";
 import { API_URL, SERVICE } from "../../service";
 
-export const updateTrackedInfo = ({ trackingId,webId,trackingUrl,trackingType,token  }) =>
+export const createTrackingInfo = ({ webId,trackingUrl,trackingType,token  }) =>
   query({
     method: METHOD.POST,
     url: `${API_URL}/${SERVICE.TRACKING}/api/tracking/info`,
-    data: { trackingId:trackingId,webId:webId,trackingUrl: trackingUrl ,trackingType:trackingType},
+    data: { webId:webId,trackingUrl: trackingUrl ,trackingType:trackingType},
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token
