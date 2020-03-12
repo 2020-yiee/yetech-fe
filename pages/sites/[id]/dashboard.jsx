@@ -1,26 +1,22 @@
-import { Typography, Layout } from 'antd';
-import { InstallAppView } from '../../../component/sites/install-app-view';
-import { SideBar, SideBarDefault } from '../../../component/sites/side-bar';
+import { Breadcrumb, Typography } from 'antd';
 
-const contentStyle = {
-  width: 960,
-};
+import { InstallAppView } from '../../../component/sites/install-app-view';
+import { SideBarDefault } from '../../../component/sites/side-bar';
+import { SkeletonPage } from '../../../component/sites/skeleton-page';
 
 const Dashboard = ({ id }) => {
   const verified = false;
   return (
-    <Layout className="h-screen flex flex-row">
-      <SideBar id={id} sideBarActive={SideBarDefault.DASH_BOARD} />
-      <Layout className="h-full flex-1 p-8">
-        <Layout.Content
-          className="bg-white m-auto py-8 px-16"
-          style={contentStyle}
-        >
-          <Typography.Title>Dashboard</Typography.Title>
-          {verified ? <InstallAppView /> : <InstallAppView />}
-        </Layout.Content>
-      </Layout>
-    </Layout>
+    <SkeletonPage id={id} sideBarActive={SideBarDefault.DASH_BOARD}>
+      <Breadcrumb>
+        <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
+        <Breadcrumb.Item>Install application</Breadcrumb.Item>
+      </Breadcrumb>
+
+      <Typography.Title level={2}>Dashboard</Typography.Title>
+
+      {verified ? <InstallAppView webID={id} /> : <InstallAppView webID={id} />}
+    </SkeletonPage>
   );
 };
 

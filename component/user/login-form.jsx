@@ -8,7 +8,7 @@ import { setAccessToken } from '../../utils/account-utils';
 
 export const LoginForm = () => {
   const router = useRouter();
-  const { setProfile } = useAccountContext();
+  const { setProfile, setSetting } = useAccountContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -18,16 +18,19 @@ export const LoginForm = () => {
 
     try {
       const response = await login(data);
-      console.log({ response });
       if (response.status === 200 || response.status === 304) {
         const { token, ...profile } = response.data;
         setAccessToken(token);
         setProfile(profile);
-        router.push(
-          '/sites/[id]/dashboard',
-          `/sites/0/dashboard`,
-          // `/sites/${profile.websites[0]}/dashboard`,
-        );
+        const activeOrganization = profile.organizations[0];
+        const activeWebsite = activeOrganization.websites[0];
+        setSetting({
+          activeOrganization,
+          activeWebsite,
+        });
+
+        const { webID } = activeWebsite;
+        router.push(`/sites/[id]/dashboard`, `/sites/${webID}/dashboard`);
         return;
       }
 
@@ -41,7 +44,7 @@ export const LoginForm = () => {
       setError('Could not login your account');
     } catch (error) {
       setProfile(null);
-      setError('Invalid username or password');
+      setError('Invalid email or password');
       console.log(error);
     } finally {
       setLoading(false);
@@ -59,23 +62,17 @@ export const LoginForm = () => {
         />
 
         <Form.Item
-          name="username"
-          rules={[{ required: true, message: 'Please input your username!' }]}
+          name="email"
+          rules={[{ required: true, message: 'Please input your email!' }]}
         >
-          <Input
-            size="large"
-            placeholder="Enter your username"
-          />
+          <Input size="large" type="email" placeholder="Enter your email" />
         </Form.Item>
 
         <Form.Item
           name="password"
           rules={[{ required: true, message: 'Please input your password!' }]}
         >
-          <Input.Password
-            size="large"
-            placeholder="Enter your password"
-          />
+          <Input.Password size="large" placeholder="Enter your password" />
         </Form.Item>
 
         {error && (
