@@ -1,5 +1,4 @@
-import { Button } from 'antd';
-import { Typography, Layout } from 'antd';
+import { Typography } from 'antd';
 import { useState, useEffect } from 'react';
 
 export const InstallAppView = ({ webID }) => {
@@ -13,8 +12,8 @@ export const InstallAppView = ({ webID }) => {
   return (
     <div>
       <Typography.Title level={4}>Install YiTech on your site</Typography.Title>
-      <p className="mb-1">
-        Paste the Hotjar code into the <b>{`<head>`}</b> of every page you wish
+      <p className="mb-2">
+        Paste the YiTech code into the <b>{`<head>`}</b> of every page you wish
         to track visitors and collect feedback on, and then verify your
         installation.
       </p>
@@ -33,10 +32,6 @@ export const InstallAppView = ({ webID }) => {
         </code>
       </div>
       <br />
-
-      <Button type="green" size="large">
-        Verify Installation
-      </Button>
     </div>
   );
 };

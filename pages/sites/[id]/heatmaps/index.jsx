@@ -126,41 +126,30 @@ const Click = ({ id } ) => {
     <SkeletonPage id={id} sideBarActive={SideBarDefault.HEATMAPS}>
       <Breadcrumb>
         <Breadcrumb.Item>Analytics</Breadcrumb.Item>
-        <Breadcrumb.Item>Click Tracking</Breadcrumb.Item>
+        <Breadcrumb.Item>Heatmap Tracking</Breadcrumb.Item>
         <Breadcrumb.Item>All</Breadcrumb.Item>
       </Breadcrumb>
 
-      <Typography.Title level={2}>Click Tracking</Typography.Title>
+      <Typography.Title level={2}>Heatmap Tracking</Typography.Title>
 
       <Modal
-        title="Add Click Tracking"
+        title="Add Heatmap Tracking"
         visible={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}
-        footer={[]}
+        footer = {[]}
       >
         <Form name="basic" onFinish={handleSubmit}>
           <Form.Item
             name="name"
-            rules={[
-              {
-                required: true,
-                message: "Please input your click tracking name!"
-              }
-            ]}
+            rules={[{ required: true, message: "Please input your click tracking name!" }]}
           >
-            <Input
-              size="large"
-              type="basic"
-              placeholder="Enter your click tracking name"
-            />
+            <Input size="large" type="basic" placeholder="Enter your click tracking name" />
           </Form.Item>
 
           <Form.Item
             name="trackingUrl"
-            rules={[
-              { required: true, message: "Please input your tracking url!" }
-            ]}
+            rules={[{ required: true, message: "Please input your tracking url!" }]}
           >
             <Input size="large" placeholder="Enter your tracking url" />
           </Form.Item>
