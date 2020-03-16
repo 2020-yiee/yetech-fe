@@ -5,6 +5,9 @@ import {
   AppstoreOutlined,
   DoubleRightOutlined,
   PlusOutlined,
+  AreaChartOutlined,
+  FireOutlined,
+  InfoCircleOutlined
 } from '@ant-design/icons';
 import { useAccountContext } from '../profile/profile-context';
 
@@ -18,17 +21,17 @@ export const SideBarDefault = {
 const menus = [
   {
     key: SideBarDefault.HEATMAPS,
-    icon: <DesktopOutlined />,
+    icon: <FireOutlined />,
     name: 'Heatmaps',
   },
   {
     key: SideBarDefault.CONVERSION_RATE,
-    icon: <DesktopOutlined />,
+    icon: <AreaChartOutlined />,
     name: 'Funnels',
   },
   {
     key: SideBarDefault.INCOMING_FEEDBACK,
-    icon: <DesktopOutlined />,
+    icon: <InfoCircleOutlined />,
     name: 'Incoming Feedback',
   },
 ];

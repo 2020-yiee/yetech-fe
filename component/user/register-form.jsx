@@ -6,9 +6,9 @@ import { useAccountContext } from '../profile/profile-context';
 
 const items = [
   { key: 'email', display: 'email' },
-  { key: 'full_name', display: 'full name' },
-  { key: 'web_url', display: 'web url' },
-  { key: 'username', display: 'username' },
+  { key: 'fullName', display: 'full name' },
+  { key: 'domainUrl', display: 'Domain Url' },
+  { key: 'organizationName', display: 'Organization Name' },
   { key: 'password', display: 'password', isPassword: true },
 ];
 
@@ -31,10 +31,11 @@ export const RegisterForm = () => {
       }
 
       setProfile(null);
-      setError('Login failed');
+      setError('Register failed');
     } catch (error) {
       setProfile(null);
-      setError('Login failed');
+      setError("Something went wrong");
+      console.log(error);
     } finally {
       setLoading(false);
     }
