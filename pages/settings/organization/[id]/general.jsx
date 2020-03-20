@@ -69,6 +69,7 @@ const General = ({ id }) => {
 
       setSetting({
         websites,
+        ...setting,
       });
     }
   }, [profile]);

@@ -1,41 +1,16 @@
-import React from 'react';
-import { SkeletonPageWithoutWebSection } from '../../../../component/sites/skeleton-page-without-web-section';
-import { SideBarDefault } from '../../../../component/sites/side-bar';
+import React, { useEffect } from 'react';
+
 import { Typography, Popover, Menu, Button, Table } from 'antd';
 import { PlusOutlined, MoreOutlined } from "@ant-design/icons";
+import moment from 'moment';
 
-const {Title} = Typography;
+import { SkeletonPageWithoutWebSection } from '../../../../component/sites/skeleton-page-without-web-section';
+import { SideBarDefault } from '../../../../component/sites/side-bar';
+import { getOrganizationMembers } from '../../../../common/query-lib/organization/get-organization-members';
+import { getAccessToken } from '../../../../utils/account-utils';
+import { useAccountContext } from '../../../../component/profile/profile-context';
 
-const dataSource = [
-  {
-    key: "1",
-    fullName: "Huy LM",
-    email: "huylm@gmail.com",
-    jointDate: "1/13/2020",
-    role: "Account Owner"
-  },
-  {
-    key: "2",
-    fullName: "Lam TV",
-    email: "lamtv@gmail.com",
-    jointDate: "1/14/2020",
-    role: "Member"
-  },
-  {
-    key: "3",
-    fullName: "Tho TD",
-    email: "thotd@gmail.com",
-    jointDate: "1/13/2019",
-    role: "Member"
-  },
-  {
-    key: "4",
-    fullName: "Huy VQ",
-    email: "huyvq@gmail.com",
-    jointDate: "1/13/2002",
-    role: "Member"
-  }
-];
+const { Title } = Typography;
 
 const columns = [
   {
@@ -58,7 +33,7 @@ const columns = [
     dataIndex: "role",
     key: "role"
   },
-  { 
+  {
     render: () => (
       <Popover
         content={
@@ -79,24 +54,66 @@ const columns = [
   }
 ];
 
-const Member = () => (
-  <SkeletonPageWithoutWebSection sideBarActive={SideBarDefault.SETTING_MEMBER}>
-    Member
-    <Title level={2}>Member</Title>
-    <div className="relative z-10">
-      <Button type="primary" className="absolute" style={{ bottom: -50 }}>
-        <div className="flex items-center">
-          <PlusOutlined className="pr-2" />
+const Member = ({ organizationID }) => {
+  const { setting, setSetting } = useAccountContext();
+
+  const fetchOrganizationMembers = async () => {
+    try {
+      const token = getAccessToken();
+      const response = await getOrganizationMembers({ organizationID, token });
+
+      if (response.status == 304 || response.status == 200) {
+        let members = response.data;
+
+        members = members.map(member => ({
+          key: member.userID,
+          fullName: member.fullName,
+          email: member.email,
+          jointDate: moment(member.dayJoin).format('DD/MM/YYYY'),
+          role: member.role,
+        }));
+
+        setSetting({
+          members,
+          ...setting,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchOrganizationMembers();
+  }, []);
+
+  const dataSource = setting && setting.members
+    ? setting.members
+    : [];
+
+  return (
+    <SkeletonPageWithoutWebSection sideBarActive={SideBarDefault.SETTING_MEMBER}>
+      Member
+      <Title level={2}>Member</Title>
+      <div className="relative z-10">
+        <Button type="primary" className="absolute" style={{ bottom: -50 }}>
+          <div className="flex items-center">
+            <PlusOutlined className="pr-2" />
           Invite Member
         </div>
-      </Button>
-    </div>
-    <Table
-      pagination={{ position: "both" }}
-      columns={columns}
-      dataSource={dataSource}
-    ></Table>
-  </SkeletonPageWithoutWebSection>
-);
+        </Button>
+      </div>
+      <Table
+        pagination={{ position: "both" }}
+        columns={columns}
+        dataSource={dataSource}
+      ></Table>
+    </SkeletonPageWithoutWebSection>
+  );
+};
+
+Member.getInitialProps = ({ query: { id } }) => {
+  return { organizationID: id };
+};
 
 export default Member;
