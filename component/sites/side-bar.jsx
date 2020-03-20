@@ -5,7 +5,9 @@ import {
   PlusOutlined,
   AreaChartOutlined,
   FireOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  SettingOutlined,
+  UsergroupAddOutlined,
 } from '@ant-design/icons';
 import { useAccountContext } from '../profile/profile-context';
 
