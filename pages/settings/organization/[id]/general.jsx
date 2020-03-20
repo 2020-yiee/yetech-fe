@@ -1,38 +1,14 @@
 import React, { useEffect } from 'react';
+
+import { Table, Button, Popover, Menu, Typography } from 'antd';
+import moment from 'moment';
+import { PlusOutlined, MoreOutlined } from '@ant-design/icons';
+
 import { SkeletonPageWithoutWebSection } from '../../../../component/sites/skeleton-page-without-web-section';
 import { SideBarDefault } from '../../../../component/sites/side-bar';
-import { Table, Button, Popover, Menu, Typography } from 'antd';
-import { PlusOutlined, MoreOutlined } from '@ant-design/icons';
 import { useAccountContext } from '../../../../component/profile/profile-context';
 
 const { Title } = Typography;
-
-const dummyDataSource = [
-  {
-    key: '1',
-    domainUrl: 'www.google.com',
-    createdDate: '3/15/2020',
-    createdBy: 'Huy LM',
-  },
-  {
-    key: '2',
-    domainUrl: 'www.loathai.herokuapp.com',
-    createdDate: '3/20/2020',
-    createdBy: 'Lam TV',
-  },
-  {
-    key: '3',
-    domainUrl: 'www.abc.com',
-    createdDate: '2/15/2020',
-    createdBy: 'Tran Duc Tho',
-  },
-  {
-    key: '4',
-    domainUrl: 'www.youtube.com',
-    createdDate: '3/8/2020',
-    createdBy: 'Huy VQ',
-  },
-];
 
 const columns = [
   {
@@ -72,16 +48,33 @@ const columns = [
 ];
 
 const General = ({ id }) => {
-  // co id cua organization ---> cap nhat active organization trong bien setting ben duoi
   const { profile, setProfile, setting, setSetting } = useAccountContext();
 
   useEffect(() => {
-    // buoc nay di fetch du lieu giong trong profile-provider.jsx dong` 30
-    // fetch xong set profile & set activeOrganization lai
-  }, []);
+    if (profile) {
+      let websites = [];
 
-  const dataSource = profile
-    ? [] // moc het web cua active organization (co trong bien setting) show ra
+      profile.organizations.forEach(organization => {
+        if (organization.organizationID === id) {
+          organization.websites.forEach(website => {
+            websites.push({
+              key: website.webID,
+              domainUrl: website.webUrl,
+              createdDate: moment(website.createdAt).format('DD/MM/YYYY'),
+              createdBy: website.authorName,
+            });
+          });
+        }
+      });
+
+      setSetting({
+        websites,
+      });
+    }
+  }, [profile]);
+
+  const dataSource = profile && setting
+    ? setting.websites
     : [];
 
   return (
@@ -101,7 +94,7 @@ const General = ({ id }) => {
       <Table
         pagination={{ position: 'both' }}
         columns={columns}
-        dataSource={dummyDataSource}
+        dataSource={dataSource}
       ></Table>
     </SkeletonPageWithoutWebSection>
   );
