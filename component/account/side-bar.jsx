@@ -8,6 +8,9 @@ import {
   InfoCircleOutlined,
   SettingOutlined,
   UsergroupAddOutlined,
+  UserOutlined,
+  UnorderedListOutlined,
+  LogoutOutlined
 } from '@ant-design/icons';
 import { useAccountContext } from '../profile/profile-context';
 
@@ -19,12 +22,12 @@ export const SideBarDefault = {
 const menus = [
   {
     key: SideBarDefault.PROFILE,
-    icon: <AreaChartOutlined />,
+    icon: <UserOutlined />,
     name: 'Profile',
   },
   {
     key: SideBarDefault.ORGANIZATION,
-    icon: <AreaChartOutlined />,
+    icon: <UnorderedListOutlined />,
     name: 'Organization',
   },
 ];
@@ -80,7 +83,7 @@ export const SideBar = ({ sideBarActive }) => {
         <Menu selectable={false} theme="dark" className="mb-4 bg-transparent">
           <Menu.Item>
             <div className="flex items-center">
-              <AreaChartOutlined />
+              <LogoutOutlined />
               <span>Logout</span>
             </div>
           </Menu.Item>
