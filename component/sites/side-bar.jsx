@@ -1,13 +1,13 @@
 import { Layout, Menu, Card, Popover, Button, Select, Divider } from 'antd';
 import { useRouter } from 'next/router';
 import {
-  DesktopOutlined,
   AppstoreOutlined,
-  DoubleRightOutlined,
   PlusOutlined,
   AreaChartOutlined,
   FireOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  SettingOutlined,
+  UsergroupAddOutlined,
 } from '@ant-design/icons';
 import { useAccountContext } from '../profile/profile-context';
 
@@ -16,6 +16,8 @@ export const SideBarDefault = {
   HEATMAPS: 'HEATMAPS',
   CONVERSION_RATE: 'CONVERSION_RATE',
   INCOMING_FEEDBACK: 'INCOMING_FEEDBACK',
+  SETTING_MEMBER: 'SETTING_MEMBER',
+  SETTING_GENERAL: 'SETTING_GENERAL',
 };
 
 const menus = [
@@ -36,30 +38,98 @@ const menus = [
   },
 ];
 
-export const SideBar = ({ id, sideBarActive }) => {
-  const { profile, setting, setSetting } = useAccountContext();
+const settings = [
+  {
+    key: SideBarDefault.SETTING_GENERAL,
+    icon: <SettingOutlined />,
+    name: 'General',
+  },
+  {
+    key: SideBarDefault.SETTING_MEMBER,
+    icon: <UsergroupAddOutlined />,
+    name: 'Member',
+  },
+];
+
+export const SideBar = ({ sideBarActive }) => {
+  const { profile, route, setting, setSetting } = useAccountContext();
   const router = useRouter();
 
+  const organizations = profile ? profile.organizations : undefined;
+  const activeOrganization = setting ? setting.activeOrganization : undefined;
+  const activeWebsite = setting ? setting.activeWebsite : undefined;
+
   const handleOnClick = selection => {
+    let dummyID;
+
     switch (selection) {
       case SideBarDefault.DASH_BOARD:
-        router.push('/sites/[id]/dashboard', `/sites/${id}/dashboard`);
-        break;
       case SideBarDefault.HEATMAPS:
-        router.push('/sites/[id]/heatmaps', `/sites/${id}/heatmaps`);
-        break;
       case SideBarDefault.CONVERSION_RATE:
-        router.push(
+      case SideBarDefault.INCOMING_FEEDBACK: {
+        if (activeWebsite) {
+          dummyID = activeWebsite.webID;
+        }
+
+        if (
+          !dummyID &&
+          activeOrganization &&
+          activeOrganization.websites.length !== 0
+        ) {
+          dummyID = activeOrganization.websites[0].webID;
+        }
+        break;
+      }
+
+      case SideBarDefault.SETTING_MEMBER:
+      case SideBarDefault.SETTING_GENERAL: {
+        if (activeOrganization) {
+          dummyID = activeOrganization.organizationID;
+        }
+        break;
+      }
+    }
+
+    if (!dummyID) {
+      return router.push('/');
+    }
+
+    switch (selection) {
+      case SideBarDefault.DASH_BOARD:
+        return router.push(
+          '/sites/[id]/dashboard',
+          `/sites/${dummyID}/dashboard`,
+        );
+
+      case SideBarDefault.HEATMAPS:
+        return router.push(
+          '/sites/[id]/heatmaps',
+          `/sites/${dummyID}/heatmaps`,
+        );
+
+      case SideBarDefault.CONVERSION_RATE:
+        return router.push(
           '/sites/[id]/conversion-rate',
-          `/sites/${id}/conversion-rate`,
+          `/sites/${dummyID}/conversion-rate`,
         );
-        break;
+
       case SideBarDefault.INCOMING_FEEDBACK:
-        router.push(
+        return router.push(
           '/sites/[id]/incoming-feedback',
-          `/sites/${id}/incoming-feedback`,
+          `/sites/${dummyID}/incoming-feedback`,
         );
-        break;
+
+      case SideBarDefault.SETTING_GENERAL:
+        return router.push(
+          '/organization/[id]/settings/general',
+          `/organization/${dummyID}/settings/general`,
+        );
+
+      case SideBarDefault.SETTING_MEMBER:
+        return router.push(
+          '/organization/[id]/settings/member',
+          `/organization/${dummyID}/settings/member`,
+        );
     }
   };
 
@@ -74,7 +144,12 @@ export const SideBar = ({ id, sideBarActive }) => {
   };
 
   const renderOrganizationContentPopover = () => (
-    <Menu theme="light" mode="vertical" className="border-r-0" style={{ minWidth: 250 }}>
+    <Menu
+      theme="light"
+      mode="vertical"
+      className="border-r-0"
+      style={{ minWidth: 250 }}
+    >
       {organizations &&
         organizations.map(organization => [
           <Menu.Item
@@ -94,13 +169,11 @@ export const SideBar = ({ id, sideBarActive }) => {
     </Menu>
   );
 
-  const organizations = profile ? profile.organizations : undefined;
-  const activeOrganization = setting ? setting.activeOrganization : undefined;
-
   return (
     <Layout.Sider width={200} theme="dark" breakpoint="md">
       <Menu
-        mode="inline"
+        selectable={false}
+        mode="vertical"
         theme="dark"
         defaultSelectedKeys={[sideBarActive]}
         className="h-full border-r-0"
@@ -122,7 +195,7 @@ export const SideBar = ({ id, sideBarActive }) => {
             placement="bottomRight"
             content={renderOrganizationContentPopover()}
             overlayClassName="custom-popover"
-            trigger="hover"
+            trigger="click"
           >
             <div className="flex items-center">
               <AppstoreOutlined />
@@ -137,6 +210,17 @@ export const SideBar = ({ id, sideBarActive }) => {
 
         <Menu.ItemGroup title="Analytics">
           {menus.map(({ key, icon, name }) => (
+            <Menu.Item key={key} onClick={() => handleOnClick(key)}>
+              <div className="flex items-center">
+                {icon}
+                <span>{name}</span>
+              </div>
+            </Menu.Item>
+          ))}
+        </Menu.ItemGroup>
+
+        <Menu.ItemGroup title="Settings">
+          {settings.map(({ key, icon, name }) => (
             <Menu.Item key={key} onClick={() => handleOnClick(key)}>
               <div className="flex items-center">
                 {icon}

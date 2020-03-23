@@ -2,7 +2,7 @@ import { Breadcrumb, Typography, Layout, Tabs, Menu } from 'antd';
 
 import { SideBarDefault } from '../../../../component/sites/side-bar';
 import { HeatmapTabs } from '../../../../component/sites/heatmap-tabs/heatmap-tabs';
-import { SkeletonPage } from '../../../../component/sites/skeleton-page';
+import { SkeletonPage } from '../../../../component/sites/skeleton-page/skeleton-page';
 
 const Statistic = ({ id, trackID, detail: initDetail }) => {
   return (

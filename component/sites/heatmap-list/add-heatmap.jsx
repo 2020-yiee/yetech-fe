@@ -5,6 +5,9 @@ import { PlusOutlined } from '@ant-design/icons';
 import { createTrackingInfo } from '../../../common/query-lib/heatmap-data/create-tracking-info';
 import { getAccessToken } from '../../../utils/account-utils';
 import { useAccountContext } from '../../profile/profile-context';
+import { SelectTypeURL } from '../select-type-url';
+import { FooterModal } from '../../footer-modal';
+import { TYPE_URL } from '../../../common/type-url';
 
 export const AddHeapMap = ({ addTracking }) => {
   const { setting } = useAccountContext();
@@ -13,6 +16,8 @@ export const AddHeapMap = ({ addTracking }) => {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [trackingUrl, setTrackingURL] = useState('');
+  const [captureUrl, setCaptureURL] = useState('');
+  const [typeURL, setTypeURL] = useState(TYPE_URL.MATCH);
   const [name, setName] = useState('');
   const [error, setError] = useState('');
 
@@ -29,8 +34,13 @@ export const AddHeapMap = ({ addTracking }) => {
       if (name == '' || trackingUrl == '') {
         return;
       }
+
+      if (typeURL.key === TYPE_URL.MATCH.key) {
+        setCaptureURL(trackingUrl);
+      }
+
       const response = await createTrackingInfo(
-        { name, trackingUrl, webID },
+        { name, trackingUrl, typeUrl: typeURL.key, captureUrl, webID },
         token,
       );
 
@@ -56,19 +66,13 @@ export const AddHeapMap = ({ addTracking }) => {
         title="Add Heatmap Tracking"
         visible={visible}
         onCancel={() => setVisible(false)}
-        footer={[
-          <Button key="back" onClick={() => setVisible(false)}>
-            Cancel
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
+        footer={
+          <FooterModal
+            onCancel={() => setVisible(false)}
+            onSubmit={handleAddTracking}
             loading={loading}
-            onClick={() => handleAddTracking()}
-          >
-            Submit
-          </Button>,
-        ]}
+          />
+        }
       >
         <Form name="basic" ref={formRef}>
           <Form.Item
@@ -89,19 +93,45 @@ export const AddHeapMap = ({ addTracking }) => {
             />
           </Form.Item>
 
-          <Form.Item
-            name="trackingUrl"
-            rules={[
-              { required: true, message: 'Please input your tracking url!' },
-            ]}
-          >
-            <Input
+          <Input.Group compact>
+            <SelectTypeURL
+              onChange={key => setTypeURL(TYPE_URL[key])}
               size="large"
-              value={trackingUrl}
-              onChange={event => setTrackingURL(event.currentTarget.value)}
-              placeholder="Enter your tracking url"
+              width="30%"
             />
-          </Form.Item>
+
+            <Form.Item
+              name="trackingUrl"
+              className="-ml-px"
+              style={{ width: '70%' }}
+              rules={[
+                { required: true, message: 'Please input your tracking url!' },
+              ]}
+            >
+              <Input
+                size="large"
+                value={trackingUrl}
+                placeholder={typeURL.suggest}
+                onChange={event => setTrackingURL(event.currentTarget.value)}
+              />
+            </Form.Item>
+          </Input.Group>
+
+          {typeURL != 'match' && (
+            <Form.Item
+              name="captureUrl"
+              rules={[
+                { required: true, message: 'Please input URL to capture!' },
+              ]}
+            >
+              <Input
+                size="large"
+                value={captureUrl}
+                placeholder="Enter capture URL"
+                onChange={event => setCaptureURL(event.currentTarget.value)}
+              />
+            </Form.Item>
+          )}
 
           {error && (
             <span className="block mb-4 text-red-600 text-center">{error}</span>

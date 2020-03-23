@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 import { getAccountContext } from './profile-context';
 import { getUser } from '../../common/query-lib/user/get-user';
@@ -8,6 +9,7 @@ export const AccountProvider = ({ children }) => {
   const [profile, setProfile] = useState();
   const [setting, setSetting] = useState();
   const [route, setRoute] = useState();
+  const router = useRouter();
 
   const AccountContext = getAccountContext({
     profile,
@@ -46,18 +48,30 @@ export const AccountProvider = ({ children }) => {
 
   useEffect(() => {
     if (route && profile) {
-      const activeOrganization = profile.organizations.find(organization =>
-        organization.websites.some(({ webID }) => webID == route.id),
-      );
-      if (activeOrganization) {
-        const activeWebsite = activeOrganization.websites.find(
-          ({ webID }) => route.id == webID,
+      const { webID: routeWebID, organizationID: routeOrganizationID } = route;
+
+      if (routeWebID) {
+        const activeOrganization = profile.organizations.find(({ websites }) =>
+          websites.some(({ webID }) => webID == routeWebID),
         );
-        if (activeWebsite) {
-          setSetting({
-            activeOrganization,
-            activeWebsite,
-          });
+        const activeWebsite = activeOrganization
+          ? activeOrganization.websites.find(({ webID }) => webID == routeWebID)
+          : undefined;
+
+        setSetting({
+          ...setting,
+          activeOrganization,
+          activeWebsite,
+        });
+      }
+
+      if (routeOrganizationID) {
+        const activeOrganization = profile.organizations.find(
+          ({ organizationID }) => routeOrganizationID == organizationID,
+        );
+
+        if (activeOrganization) {
+          setSetting({ ...setting, activeOrganization });
         }
       }
     }
