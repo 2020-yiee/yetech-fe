@@ -13,7 +13,7 @@ import {
     //========================================================
   
     return (
-      <SkeletonPage id={id} sideBarActive={SideBarDefault.HEATMAPS}>
+      <SkeletonPage id={id} sideBarActive={SideBarDefault.CONVERSION_RATE}>
         <Breadcrumb>
           <Breadcrumb.Item>Analytics</Breadcrumb.Item>
           <Breadcrumb.Item>Funnel Tracking</Breadcrumb.Item>

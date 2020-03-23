@@ -281,29 +281,35 @@ function postConversion() {
  */
 const sessionID = sessionStorage.getItem(SESSION_ID_FIELD);
 const trackedSteps = sessionStorage.getItem(SESSION_TRACKED_STEPS_FIELD);
-if (!sessionID || !trackedSteps) {
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      console.log(this.responseText);
-      const { ip } = JSON.parse(this.responseText);
-      const sessionID = `${new Date().getTime()}-${ip}-${navigator.userAgent}`;
-      const trackedSteps = [trackingUrl];
-      sessionStorage.setItem(SESSION_ID_FIELD, sessionID);
-      sessionStorage.setItem(
-        SESSION_TRACKED_STEPS_FIELD,
-        JSON.stringify(trackedSteps),
-      );
-      postConversion();
-    }
-  };
-  xhttp.open('GET', 'https://api.ipify.org/?format=json', true);
-  xhttp.send();
-} else {
-  const parsedTrackedSteps = JSON.parse(trackedSteps);
-  parsedTrackedSteps.push(trackingUrl);
-  sessionStorage.setItem(
-    SESSION_TRACKED_STEPS_FIELD,
-    JSON.stringify(parsedTrackedSteps),
-  );
-  postConversion();
+
+function postTrackedFunnelData(){
+  if (!sessionID || !trackedSteps) {
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        console.log(this.responseText);
+        const { ip } = JSON.parse(this.responseText);
+        const sessionID = `${new Date().getTime()}-${ip}-${navigator.userAgent}`;
+        const trackedSteps = [trackingUrl];
+        sessionStorage.setItem(SESSION_ID_FIELD, sessionID);
+        sessionStorage.setItem(
+          SESSION_TRACKED_STEPS_FIELD,
+          JSON.stringify(trackedSteps),
+        );
+        postConversion();
+      }
+    };
+    xhttp.open('GET', 'https://api.ipify.org/?format=json', true);
+    xhttp.send();
+  } else {
+    const parsedTrackedSteps = JSON.parse(trackedSteps);
+    parsedTrackedSteps.push(trackingUrl);
+    sessionStorage.setItem(
+      SESSION_TRACKED_STEPS_FIELD,
+      JSON.stringify(parsedTrackedSteps),
+    );
+    postConversion();
+  }
 }
+postTrackedFunnelData();
+
+window.onhashchange = postTrackedFunnelData;

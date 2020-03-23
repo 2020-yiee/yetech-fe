@@ -101,10 +101,10 @@ export const FunnelTabs = ({ id, trackID }) => {
         className="mr-4"
         onChange={([from, to]) => {
           setOption(OPTION.PICK);
-          setFrom(from);
-          setTo(to);
+          setFrom(from.utc());
+          setTo(to.utc());
         }}
-        value={[from, to]}
+        value={[from.utc(), to.utc()]}
         format={dateFormat}
       />
     </div>
