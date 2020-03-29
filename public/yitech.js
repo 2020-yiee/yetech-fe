@@ -32,16 +32,13 @@ let SCROLL_EVENT_QUEUE = [];
 const CLICK_TIME = 5000;
 const HOVER_TIME = 2000;
 const SCROLL_TIME = 5000;
+const FUNNEL_TIME = 1000;
 
 /**
  * Init tracking url
  */
-const trackingUrl = window.location.href;
-
-/**
- * Init ajax
- */
-const xhttp = new XMLHttpRequest();
+let trackingUrl = window.location.href;
+const documentHeight = document.body.offsetHeight;
 
 /**
  *  Init scroll
@@ -169,6 +166,7 @@ function handleScroll(_) {
  * @param {*} eventType
  */
 function pushEvent(eventType) {
+  const xhttp = new XMLHttpRequest();
   try {
     if (eventType === EVENT.HOVER) {
       HOVER_EVENT_QUEUE = HOVER_EVENT_QUEUE.filter(function(_, index) {
@@ -199,7 +197,13 @@ function pushEvent(eventType) {
         : `${new Date().getTime().toString()}-${navigator.userAgent}`,
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
-      data: JSON.stringify(queue),
+      data:
+        eventType == EVENT.SCROLL
+          ? JSON.stringify({
+              documentHeight,
+              scroll: queue,
+            })
+          : JSON.stringify(queue),
     };
 
     xhttp.open('POST', ENDPOINT_HEATMAP_SERVICE);
@@ -247,19 +251,10 @@ document.addEventListener('touchmove', handleTouch(EVENT.HOVER));
 document.addEventListener('scroll', handleScroll);
 
 /**
- * Before closing
- */
-window.addEventListener('beforeunload', function(event) {
-  pushEvent(CLICK_EVENT_QUEUE, EVENT.CLICK);
-  pushEvent(HOVER_EVENT_QUEUE, EVENT.HOVER);
-  pushEvent(HOVER_EVENT_QUEUE, EVENT.SCROLL);
-  return event;
-});
-
-/**
  * Post conversion
  */
 function postConversion() {
+  const xhttp = new XMLHttpRequest();
   const sessionID = sessionStorage.getItem(SESSION_ID_FIELD);
   const trackedSteps = sessionStorage.getItem(SESSION_TRACKED_STEPS_FIELD);
 
@@ -279,31 +274,63 @@ function postConversion() {
 /**
  * Conversion Rate - Session Storage
  */
-const sessionID = sessionStorage.getItem(SESSION_ID_FIELD);
-const trackedSteps = sessionStorage.getItem(SESSION_TRACKED_STEPS_FIELD);
-if (!sessionID || !trackedSteps) {
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      console.log(this.responseText);
-      const { ip } = JSON.parse(this.responseText);
-      const sessionID = `${new Date().getTime()}-${ip}-${navigator.userAgent}`;
-      const trackedSteps = [trackingUrl];
-      sessionStorage.setItem(SESSION_ID_FIELD, sessionID);
-      sessionStorage.setItem(
-        SESSION_TRACKED_STEPS_FIELD,
-        JSON.stringify(trackedSteps),
-      );
-      postConversion();
-    }
-  };
-  xhttp.open('GET', 'https://api.ipify.org/?format=json', true);
-  xhttp.send();
-} else {
-  const parsedTrackedSteps = JSON.parse(trackedSteps);
-  parsedTrackedSteps.push(trackingUrl);
-  sessionStorage.setItem(
-    SESSION_TRACKED_STEPS_FIELD,
-    JSON.stringify(parsedTrackedSteps),
-  );
-  postConversion();
+function pushCurrentUrl(trackingUrl) {
+  const sessionID = sessionStorage.getItem(SESSION_ID_FIELD);
+  const trackedSteps = sessionStorage.getItem(SESSION_TRACKED_STEPS_FIELD);
+  if (!sessionID || !trackedSteps) {
+    const xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        if (this.responseText === undefined || this.responseText === '') {
+          return;
+        }
+        const ip = this.responseText;
+        const sessionID = `${new Date().getTime()}-${ip}-${
+          navigator.userAgent
+        }`;
+        const trackedSteps = [trackingUrl];
+        sessionStorage.setItem(SESSION_ID_FIELD, sessionID);
+        sessionStorage.setItem(
+          SESSION_TRACKED_STEPS_FIELD,
+          JSON.stringify(trackedSteps),
+        );
+        postConversion();
+      }
+    };
+    xhttp.open('GET', 'https://api.ipify.org', true);
+    xhttp.send();
+  } else {
+    const parsedTrackedSteps = JSON.parse(trackedSteps);
+    parsedTrackedSteps.push(trackingUrl);
+    sessionStorage.setItem(
+      SESSION_TRACKED_STEPS_FIELD,
+      JSON.stringify(parsedTrackedSteps),
+    );
+    postConversion();
+  }
 }
+
+function checkCurrentUrl() {
+  const nowHref = window.location.href;
+  if (nowHref !== trackingUrl) {
+    trackingUrl = nowHref;
+    pushCurrentUrl(trackingUrl);
+  }
+}
+
+setInterval(function() {
+  checkCurrentUrl();
+}, FUNNEL_TIME);
+
+pushCurrentUrl(trackingUrl);
+
+/**
+ * Before closing
+ */
+window.addEventListener('beforeunload', function(event) {
+  pushEvent(CLICK_EVENT_QUEUE, EVENT.CLICK);
+  pushEvent(HOVER_EVENT_QUEUE, EVENT.HOVER);
+  pushEvent(HOVER_EVENT_QUEUE, EVENT.SCROLL);
+  checkCurrentUrl();
+  return event;
+});

@@ -13,6 +13,7 @@ import {
   LogoutOutlined
 } from '@ant-design/icons';
 import { useAccountContext } from '../profile/profile-context';
+import { clearAccessToken } from '../../utils/account-utils';
 
 export const SideBarDefault = {
   PROFILE: 'PROFILE',
@@ -81,7 +82,12 @@ export const SideBar = ({ sideBarActive }) => {
         </Menu>
 
         <Menu selectable={false} theme="dark" className="mb-4 bg-transparent">
-          <Menu.Item>
+          <Menu.Item
+            onClick={() => {
+              router.push('/');
+              clearAccessToken();
+            }}
+          >
             <div className="flex items-center">
               <LogoutOutlined />
               <span>Logout</span>
