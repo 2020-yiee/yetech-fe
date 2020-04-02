@@ -31,11 +31,6 @@ const menus = [
     icon: <AreaChartOutlined />,
     name: 'Funnels',
   },
-  {
-    key: SideBarDefault.INCOMING_FEEDBACK,
-    icon: <InfoCircleOutlined />,
-    name: 'Incoming Feedback',
-  },
 ];
 
 const settings = [
@@ -108,10 +103,7 @@ export const SideBar = ({ sideBarActive }) => {
         );
 
       case SideBarDefault.CONVERSION_RATE:
-        return router.push(
-          '/sites/[id]/conversion-rate',
-          `/sites/${dummyID}/conversion-rate`,
-        );
+        return router.push('/sites/[id]/funnels', `/sites/${dummyID}/funnels`);
 
       case SideBarDefault.INCOMING_FEEDBACK:
         return router.push(

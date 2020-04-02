@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useState, useEffect, useRef } from 'react';
-import { Table, Button, Input, Menu, Popover } from 'antd';
+import { Table, Button, Input, Menu, Popover, message } from 'antd';
 import { SearchOutlined, MoreOutlined } from '@ant-design/icons';
 import Highlighter from 'react-highlight-words';
 import { useRouter } from 'next/router';
@@ -9,6 +9,9 @@ import { useAccountContext } from '../../profile/profile-context';
 import { getAccessToken } from '../../../utils/account-utils';
 import { getFunnelInfo } from '../../../common/query-lib/funnel/get-funnel-info';
 import { AddFunnel } from './add-funnel-modal';
+import { EditFunnelModal } from './edit-funnel-modal';
+import { deleteFunnelInfo } from '../../../common/query-lib/funnel/delete-funnel-info';
+import { TYPE_URL } from '../../../common/type-url';
 
 const parseResponseData = ({
   trackingFunnelInfoId,
@@ -16,17 +19,38 @@ const parseResponseData = ({
   steps,
   createdAt,
 }) => {
-  return {
-    id: trackingFunnelInfoId,
-    name,
-    createdBy: 'Duc Tho Tran',
-    createdAt: new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(createdAt * 1000),
-    rate: Math.floor(Math.random() * 1000) / 100,
-  };
+  try {
+    return {
+      id: trackingFunnelInfoId,
+      name,
+      createdBy: 'Duc Tho Tran',
+      createdAt: new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(createdAt * 1000),
+      steps: JSON.parse(steps).map(({ typeUrl, ...others }) => ({
+        typeUrl: Object.keys(TYPE_URL).find(
+          key => TYPE_URL[key].key == typeUrl,
+        ),
+        ...others,
+      })),
+      rate: 5,
+    };
+  } catch (error) {
+    return {
+      id: trackingFunnelInfoId,
+      name,
+      createdBy: 'Duc Tho Tran',
+      createdAt: new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(createdAt * 1000),
+      steps: [],
+      rate: 0,
+    };
+  }
 };
 
 export const FunnelList = () => {
@@ -38,6 +62,9 @@ export const FunnelList = () => {
   const [searchedColumn, setSearchedColumn] = useState('');
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showedEdit, setShowedEdit] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editSteps, setEditSteps] = useState([]);
 
   const activeWebsite = setting ? setting.activeWebsite : undefined;
   const webID = activeWebsite ? activeWebsite.webID : undefined;
@@ -145,6 +172,22 @@ export const FunnelList = () => {
     setSearchText('');
   };
 
+  const handleDeleteFunnel = async ({ id: trackingFunnelInfoID, name }) => {
+    const token = getAccessToken();
+    try {
+      const response = await deleteFunnelInfo({
+        trackingFunnelInfoID,
+        token,
+      });
+      if (response.status === 200 || response.status === 304) {
+        setData(data.filter(({ id }) => id !== trackingFunnelInfoID));
+        message.success(`Remove ${name} funnel successfully`);
+      }
+    } catch (error) {
+      message.error(`Could not remove ${name} funnel`);
+    }
+  };
+
   const columns = [
     {
       title: 'Funnel Name',
@@ -156,8 +199,8 @@ export const FunnelList = () => {
             className="text-lg cursor-pointer hover:text-blue-600 hover:underline"
             onClick={() =>
               router.push(
-                '/sites/[id]/conversion-rate/[funnelID]',
-                `/sites/${webID}/conversion-rate/${funnelID}`,
+                '/sites/[id]/funnels/[funnelID]',
+                `/sites/${webID}/funnels/${funnelID}`,
               )
             }
           >
@@ -186,13 +229,25 @@ export const FunnelList = () => {
       sorter: (a, b) => a.rate - b.rate,
     },
     {
-      render: () => (
+      render: (_, { id, name, steps }) => (
         <Popover
           overlayClassName="custom-popover"
           content={
-            <Menu mode="inline" className="border-r-0">
-              <Menu.Item>Edit</Menu.Item>
-              <Menu.Item>Delete</Menu.Item>
+            <Menu selectable={false} mode="inline" className="border-r-0">
+              <Menu.Item
+                onClick={() => {
+                  setEditName(name);
+                  console.log(steps);
+
+                  setEditSteps(steps);
+                  setShowedEdit(true);
+                }}
+              >
+                Edit
+              </Menu.Item>
+              <Menu.Item onClick={() => handleDeleteFunnel({ id, name })}>
+                Delete
+              </Menu.Item>
             </Menu>
           }
         >
@@ -214,6 +269,15 @@ export const FunnelList = () => {
 
   return (
     <>
+      <EditFunnelModal
+        visible={showedEdit}
+        setVisible={setShowedEdit}
+        name={editName}
+        setName={setEditName}
+        steps={editSteps}
+        setSteps={setEditSteps}
+      />
+
       <AddFunnel addTracking={addTracking} />
       <Table
         columns={columns}

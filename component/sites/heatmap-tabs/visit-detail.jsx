@@ -6,7 +6,10 @@ import moment from 'moment';
 const rankStyle = { width: 250 };
 
 export const VisitDetail = ({ data }) => {
-  const parsedData = JSON.parse(data);
+  let parsedData = [];
+  try {
+    parsedData = JSON.parse(data);
+  } catch (error) {}
 
   const ranks = parsedData.map(({ x, y }) => ({
     date: moment(x * 1000).format('DD-MM-YYYY'),
@@ -26,14 +29,12 @@ export const VisitDetail = ({ data }) => {
       gridColor: '#f1f1f1',
       tickColor: '#fff',
       includeZero: false,
-      interval: 1,
     },
     data: [
       {
         type: 'splineArea',
         indexLabelFontSize: 16,
-
-        xValueType: "dateTime",
+        xValueType: 'dateTime',
         yValueFormatString: '# Visits',
         dataPoints: parsedData.map(({ x, y }) => ({
           x: x * 1000,
