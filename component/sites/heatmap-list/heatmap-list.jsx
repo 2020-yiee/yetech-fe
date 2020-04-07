@@ -39,6 +39,7 @@ export const HeatmapList = () => {
   const [loading, setLoading] = useState(false);
   const [showedEdit, setShowedEdit] = useState(false);
   const [editName, setEditName] = useState('');
+  const [editID, setEditID] = useState();
 
   const activeWebsite = setting ? setting.activeWebsite : undefined;
   const webID = activeWebsite ? activeWebsite.webID : undefined;
@@ -50,6 +51,7 @@ export const HeatmapList = () => {
       const response = await getTrackingInfo(id, token);
       if (response.status === 200 || response.status === 304) {
         const rawData = response.data;
+        console.log(rawData);
         const parsedData = rawData.map(row => parseResponseData(row));
         setData(parsedData);
       }
@@ -212,6 +214,7 @@ export const HeatmapList = () => {
             <Menu selectable={false} mode="inline" className="border-r-0">
               <Menu.Item
                 onClick={() => {
+                  setEditID(id);
                   setEditName(name);
                   setShowedEdit(true);
                 }}
@@ -240,6 +243,19 @@ export const HeatmapList = () => {
     setData([parseResponseData(row), ...data]);
   };
 
+  const updateHeatmap = ({ heatmapID, name }) => {
+    setData(
+      data.map(row =>
+        row.id == heatmapID
+          ? {
+              ...row,
+              name,
+            }
+          : row,
+      ),
+    );
+  };
+
   return (
     <>
       <EditHeatmapModal
@@ -247,6 +263,8 @@ export const HeatmapList = () => {
         setVisible={setShowedEdit}
         name={editName}
         setName={setEditName}
+        heatmapID={editID}
+        updateHeatmap={updateHeatmap}
       />
 
       <AddHeapMap addTracking={addTracking} />
