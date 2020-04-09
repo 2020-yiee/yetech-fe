@@ -51,7 +51,7 @@ export const StepDetails = ({ data }) => {
           >
             {index != last ? (
               <DownCircleTwoTone
-                twoToneColor={rate >= 30 ? '#f56565' : '#bbb'}
+                twoToneColor={rate >= 40 ? '#f56565' : '#bbb'}
                 style={{ fontSize: 32 }}
               />
             ) : (
@@ -61,7 +61,7 @@ export const StepDetails = ({ data }) => {
               />
             )}
 
-            <p className="mt-2">{index != last ? 'Drop off' : 'Rate'}</p>
+            <p className="mt-2">{index != last ? 'Drop off' : 'Conversion'}</p>
             <p>{rate}%</p>
           </div>
         );

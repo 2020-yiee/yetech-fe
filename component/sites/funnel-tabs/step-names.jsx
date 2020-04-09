@@ -35,7 +35,7 @@ export const StepNames = ({ data }) => (
         className={classNames(
           'flex-1',
           'text-gray-600',
-          'text-center',
+          'text-left',
           'border-b',
           'py-4',
           'px-1',
@@ -43,14 +43,16 @@ export const StepNames = ({ data }) => (
           'text-base',
           'font-bold',
           'flex',
-          'items-center',
-          'justify-center',
+          'items-left',
+          'justify-left',
         )}
         style={{
           marginLeft: index != 0 ? -1 : undefined,
           borderColor: '#ddd',
         }}
       >
+        <div align="left">
+        <small>Step {index}</small><br></br>
         {stepName}
         <Popover
           trigger="hover"
@@ -59,6 +61,7 @@ export const StepNames = ({ data }) => (
         >
           <InfoCircleOutlined className="ml-1" />
         </Popover>
+        </div>
       </div>
     ))}
   </div>
