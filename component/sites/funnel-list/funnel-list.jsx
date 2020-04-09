@@ -16,8 +16,8 @@ const parseResponseData = ({
   trackingFunnelInfoId,
   name,
   steps,
-  createdAt,
   authorName,
+  createdAt,
   conversionRate,
 }) => {
   try {
@@ -230,7 +230,7 @@ export const FunnelList = () => {
       dataIndex: 'rate',
       sorter: true,
       sorter: (a, b) => a.rate - b.rate,
-      render: (_, { rate }) =>(<p className="font-bold">{rate}%</p>),
+      render: (rate) => `${rate}%`
     },
     {
       render: (_, { id, name, steps }) => (
