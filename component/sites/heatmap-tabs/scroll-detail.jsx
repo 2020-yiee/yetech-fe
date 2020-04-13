@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+import { Skeleton } from 'antd';
+import classNames from 'classnames';
 
 import {
   removeAllChild,
@@ -9,7 +11,7 @@ import {
 const elementID = 'scroll-detail';
 const canvasID = 'scroll-detail-canvas';
 
-export const ScrollDetail = ({ data: rawData, imageUrl }) => {
+export const ScrollDetail = ({ loading, data: rawData, imageUrl }) => {
   useEffect(() => {
     if (rawData && imageUrl) {
       const container = removeAllChild(elementID);
@@ -20,5 +22,17 @@ export const ScrollDetail = ({ data: rawData, imageUrl }) => {
     }
   }, [rawData, imageUrl]);
 
-  return <div className="relative" id={elementID}></div>;
+  return (
+    <>
+      <Skeleton loading={loading} active />
+      <Skeleton loading={loading} active />
+      <div
+        className={classNames('relative', {
+          visible: !loading,
+          invisible: loading,
+        })}
+        id={elementID}
+      ></div>
+    </>
+  );
 };

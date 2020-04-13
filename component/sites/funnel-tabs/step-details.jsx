@@ -10,7 +10,7 @@ export const StepDetails = ({ data }) => {
     <div
       className="flex flex-row absolute w-full bottom-0"
       style={{
-        paddingLeft: 75,
+        paddingLeft: 55,
         paddingRight: 14,
       }}
     >
@@ -20,9 +20,9 @@ export const StepDetails = ({ data }) => {
 
         if (nextData) {
           const { sessions: nextSessions } = nextData;
-          rate = Math.floor(100 - (nextSessions / sessions) * 100);
+          rate = Math.floor(10000 - (nextSessions / sessions) * 10000) / 100;
           if (index == last) {
-            rate = Math.floor((sessions / nextSessions) * 100);
+            rate = Math.floor((sessions / nextSessions) * 10000) / 100;
           }
           if (isNaN(rate) || !isFinite(rate)) {
             rate = 0;
@@ -40,8 +40,9 @@ export const StepDetails = ({ data }) => {
               'font-bold',
               {
                 'text-green-500': index == last,
-                'text-red-500': index != last && rate >= 30,
-                'text-gray-500': index != last && rate < 30,
+                'text-red-500': index != last && rate >= 40,
+                'text-gray-500': index != last && rate < 40,
+                invisible: index == last,
               },
             )}
             style={{
@@ -61,8 +62,8 @@ export const StepDetails = ({ data }) => {
               />
             )}
 
-            <p className="mt-2">{index != last ? 'Drop off' : 'Conversion'}</p>
-            <p>{rate}%</p>
+            <span className="mt-2 block">{index != last ? 'Drop off' : 'Conversion'}</span>
+            <span className="block">{rate}%</span>
           </div>
         );
       })}
