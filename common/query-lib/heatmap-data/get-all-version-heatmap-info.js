@@ -1,7 +1,7 @@
 import { query, METHOD } from '../../query';
 import { API_URL, SERVICE } from '../../service';
 
-export const getAllVersionTrackingHeatmapInfo = (trackingHeatmapInfoID, token, cancelToken) =>
+export const getAllVersionTrackingHeatmapInfo = (trackingHeatmapInfoID, token) =>
   query({
     method: METHOD.GET,
     url: `${API_URL}/${SERVICE.TRACKING}/api/tracking-info/all-version`,
@@ -9,6 +9,5 @@ export const getAllVersionTrackingHeatmapInfo = (trackingHeatmapInfoID, token, c
     headers: {
       'Content-Type': 'application/json',
       Authorization: 'Bearer ' + token,
-    },
-    cancelToken,
+    }
   });

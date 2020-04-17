@@ -1,19 +1,31 @@
-import { useState } from 'react';
-import { Breadcrumb, Typography, Layout, Tabs, Menu, Skeleton } from 'antd';
+import { useState, useEffect } from "react";
+import {
+  Breadcrumb,
+  Typography,
+  Layout,
+  Tabs,
+  Menu,
+  Skeleton,
+  Dropdown,
+  message,
+} from "antd";
 
-import { SideBarDefault } from '../../../../component/sites/side-bar';
-import { HeatmapTabs } from '../../../../component/sites/heatmap-tabs/heatmap-tabs';
-import { SkeletonPage } from '../../../../component/sites/skeleton-page/skeleton-page';
-import { TYPE_URL } from '../../../../common/type-url';
-import { withAuth } from '../../../../component/user/with-auth';
+import { DownOutlined } from "@ant-design/icons";
+
+import { SideBarDefault } from "../../../../component/sites/side-bar";
+import { HeatmapTabs } from "../../../../component/sites/heatmap-tabs/heatmap-tabs";
+import { SkeletonPage } from "../../../../component/sites/skeleton-page/skeleton-page";
+import { TYPE_URL } from "../../../../common/type-url";
+import { withAuth } from "../../../../component/user/with-auth";
+import { List } from "antd/lib/form/Form";
 
 const Statistic = ({ id, trackID, detail: initDetail }) => {
-  const [trackingUrl, setTrackingUrl] = useState('');
-  const [name, setName] = useState('');
-  const [typeUrl, setTypeUrl] = useState('');
+  const [trackingUrl, setTrackingUrl] = useState("");
+  const [name, setName] = useState("");
+  const [typeUrl, setTypeUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const typeUrlKey = Object.keys(TYPE_URL).find(
-    (key) => TYPE_URL[key].key === typeUrl,
+    (key) => TYPE_URL[key].key === typeUrl
   );
   const typeUrlDisplay = typeUrlKey ? TYPE_URL[typeUrlKey].display : typeUrl;
 
