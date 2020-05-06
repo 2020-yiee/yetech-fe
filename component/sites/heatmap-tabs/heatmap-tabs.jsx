@@ -1,18 +1,17 @@
-import { Tabs, message, Dropdown, Menu } from "antd";
-import { DownOutlined } from "@ant-design/icons";
-import { useState, useEffect } from "react";
-import { ClickDetail } from "./click-detail";
-import { HoverDetail } from "./hover-detail";
-import { ScrollDetail } from "./scroll-detail";
-import { HeatmapBar } from "./heatmap-bar";
-import { VisitDetail } from "./visit-detail";
-import { ExtraContent } from "./extra-content";
+import moment from 'moment';
+import { Tabs, message } from 'antd';
+import { useState, useEffect } from 'react';
 
-import { STAT_OPTION } from "../../../common/statistic-option";
-import { getHeatmapDetail } from "../../../common/query-lib/heatmap-data/get-heatmap-detail";
-import { getAllVersionTrackingHeatmapInfo } from "../../../common/query-lib/heatmap-data/get-all-version-heatmap-info";
-import { getAccessToken } from "../../../utils/account-utils";
-import moment from "moment";
+import { ClickDetail } from './click-detail';
+import { HoverDetail } from './hover-detail';
+import { ScrollDetail } from './scroll-detail';
+import { HeatmapBar } from './heatmap-bar';
+import { VisitDetail } from './visit-detail';
+import { ExtraContent } from './extra-content';
+import { STAT_OPTION } from '../../../common/statistic-option';
+import { getHeatmapDetail } from '../../../common/query-lib/heatmap-data/get-heatmap-detail';
+import { getAccessToken } from '../../../utils/account-utils';
+import { getAllVersionTrackingHeatmapInfo } from '../../../common/query-lib/heatmap-data/get-all-version';
 import { useRouter } from 'next/router';
 
 
@@ -23,31 +22,34 @@ const queryStatistic = async (id, trackID, from, to, option) => {
   );
   const localTo = Math.floor(to.endOf("day").add(7, "hours").valueOf() / 1000);
 
-  const response = await getHeatmapDetail(
-    id,
-    trackID,
-    localFrom,
-    localTo,
-    option,
-    token
-  );
-  if (response.status === 200 || response.status === 304) {
-    return response.data;
+  try {
+    const response = await getHeatmapDetail(
+      id,
+      trackID,
+      localFrom,
+      localTo,
+      option,
+      token,
+    );
+    if (response.status === 200 || response.status === 304) {
+      return response.data;
+    }
+    return null;
+  } catch (error) {
+    return null;
   }
-
-  return null;
 };
 
 const initDetail = {
-  visit: "[]",
-  click: "[]",
-  hover: "[]",
-  scroll: "[]",
-  imageUrl: "",
-  name: "Product",
-  typeUrl: "",
-  trackingUrl: "",
-  version: "",
+  visit: '[]',
+  click: '[]',
+  hover: '[]',
+  scroll: '[]',
+  imageUrl: '',
+  name: 'Product',
+  typeUrl: '',
+  trackingUrl: '',
+  version: '',
 };
 
 export const HeatmapTabs = ({
@@ -58,9 +60,11 @@ export const HeatmapTabs = ({
   setTrackingUrl,
   loading,
   setLoading,
+  setVersion,
+  setEmptyData,
 }) => {
   const router = useRouter();
-  const [from, setFrom] = useState(moment().subtract(1, "months"));
+  const [from, setFrom] = useState(moment().subtract(1, 'months'));
   const [to, setTo] = useState(moment());
   const [option, setOption] = useState(STAT_OPTION.DESKTOP.value);
   const [activeTab, setActiveTab] = useState("visit");
@@ -100,6 +104,48 @@ export const HeatmapTabs = ({
       });
     }
   }, [typeUrl, name, trackingUrl, version]);
+
+  useEffect(() => {
+    if (version && version.length > 0) {
+      setVersion(version);
+    }
+  }, [version, trackID]);
+
+  useEffect(() => {
+    try {
+      switch (activeTab) {
+        case "visit":
+          if (!visit || visit.length <= 2) {
+            setEmptyData(true);
+            return;
+          }
+          break;
+        case "clicking":
+          if (!click || click.length <= 2) {
+            setEmptyData(true);
+            return;
+          }
+          break;
+        case "hovering":
+          if (!hover || hover.length <= 2) {
+            setEmptyData(true);
+            return;
+          }
+          break;
+        case "scrolling":
+          if (!scroll || scroll.length <= 2) {
+            setEmptyData(true);
+            return;
+          }
+          break;
+      }
+
+      setEmptyData(false);
+    } catch (error) {
+      setEmptyData(true);
+      console.log(error);
+    }
+  }, [activeTab, visit, click, hover, scroll]);
 
   const getTabHead = (title) => (
     <div className="text-center" style={{ padding: "0px 20px", minWidth: 80 }}>
@@ -142,12 +188,13 @@ export const HeatmapTabs = ({
       return setDetail(detail);
     }
     setLoading(false);
-    message.error("Cannot fetch heatmap statistics");
+    message.error('Cannot fetch heatmap statistics');
+    router.push('/sites/[id]/heatmaps', `/sites/${id}/heatmaps`);
   };
 
   useEffect(() => {
     fetchStatistic();
-  }, [option, from, to]);
+  }, [option, from, to, trackID]);
 
   const fetchVersion = async () => {
     const result = await getAllVersionTrackingHeatmapInfo(
