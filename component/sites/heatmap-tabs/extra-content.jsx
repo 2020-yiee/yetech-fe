@@ -35,8 +35,8 @@ export const ExtraContent = ({
     <DatePicker.RangePicker
       className="mr-4"
       onChange={([from, to]) => {
-        setFrom(from);
-        setTo(to);
+        setFrom(from.utc());
+        setTo(to.utc());
       }}
       value={[from, to]}
       format={dateFormat}

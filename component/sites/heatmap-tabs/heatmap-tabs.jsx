@@ -14,12 +14,13 @@ import { getAccessToken } from '../../../utils/account-utils';
 import { getAllVersionTrackingHeatmapInfo } from '../../../common/query-lib/heatmap-data/get-all-version';
 import { useRouter } from 'next/router';
 
-const queryStatistic = async ({ id, trackID, from, to, option }) => {
+
+const queryStatistic = async (id, trackID, from, to, option) => {
   const token = getAccessToken();
   const localFrom = Math.floor(
-    from.startOf('day').add(7, 'hours').valueOf() / 1000,
+    from.startOf("day").add(7, "hours").valueOf() / 1000
   );
-  const localTo = Math.floor(to.endOf('day').add(7, 'hours').valueOf() / 1000);
+  const localTo = Math.floor(to.endOf("day").add(7, "hours").valueOf() / 1000);
 
   try {
     const response = await getHeatmapDetail(
@@ -66,8 +67,10 @@ export const HeatmapTabs = ({
   const [from, setFrom] = useState(moment().subtract(1, 'months'));
   const [to, setTo] = useState(moment());
   const [option, setOption] = useState(STAT_OPTION.DESKTOP.value);
-  const [activeTab, setActiveTab] = useState('visit');
+  const [activeTab, setActiveTab] = useState("visit");
   const [detail, setDetail] = useState(initDetail);
+  const [vList, setVList] = useState([]);
+  const [trackingID, setTrackingID] = useState(trackID);
   const {
     visit,
     click,
@@ -90,7 +93,17 @@ export const HeatmapTabs = ({
     if (trackingUrl) {
       setTrackingUrl(trackingUrl);
     }
-  }, [typeUrl, name, trackingUrl]);
+    if (version) {
+      vList.map((element) => {
+        if (element.version == version) {
+          setFrom(moment(element.createdAt * 1000));
+          if (element.tracking == false) {
+            setTo(moment(element.endAt * 1000));
+          }
+        }
+      });
+    }
+  }, [typeUrl, name, trackingUrl, version]);
 
   useEffect(() => {
     if (version && version.length > 0) {
@@ -135,14 +148,41 @@ export const HeatmapTabs = ({
   }, [activeTab, visit, click, hover, scroll]);
 
   const getTabHead = (title) => (
-    <div className="text-center" style={{ padding: '0px 20px', minWidth: 80 }}>
+    <div className="text-center" style={{ padding: "0px 20px", minWidth: 80 }}>
       {title}
     </div>
   );
 
+  const onClick = async ({ key }) => {
+    setTrackingID(key);
+    vList.map((element) => {
+      if (element.trackingHeatmapInfoId == key) {
+        setFrom(moment(element.createdAt * 1000));
+        if (element.tracking == false) {
+          setTo(moment(element.endAt * 1000));
+        }else{
+          setTo(moment());
+        }
+      }
+    });
+    //router.push(`/sites/${id}/heatmaps/${key}`);
+  };
+
+  const menu = () => {
+    return (
+      <Menu onClick={onClick}>
+        {vList.map((elment) => (
+          <Menu.Item key={elment.trackingHeatmapInfoId}>
+            {elment.version}
+          </Menu.Item>
+        ))}
+      </Menu>
+    );
+  };
+
   const fetchStatistic = async () => {
     setLoading(true);
-    const detail = await queryStatistic({ id, trackID, from, to, option });
+    const detail = await queryStatistic(id, trackingID, from, to, option);
     if (detail) {
       setLoading(false);
       return setDetail(detail);
@@ -156,20 +196,42 @@ export const HeatmapTabs = ({
     fetchStatistic();
   }, [option, from, to, trackID]);
 
+  const fetchVersion = async () => {
+    const result = await getAllVersionTrackingHeatmapInfo(
+      trackingID,
+      getAccessToken()
+    );
+    if (result) {
+      setVList(result.data);
+    }
+  };
+  useEffect(() => {
+    fetchVersion();
+  }, []);
+
   return (
     <>
-      {activeTab !== 'visit' && (
+      {activeTab !== "visit" && (
         <HeatmapBar
           click={click}
-          showedClick={activeTab == 'clicking'}
-          showedScroll={activeTab == 'scrolling'}
+          showedClick={activeTab == "clicking"}
+          showedScroll={activeTab == "scrolling"}
         />
       )}
+      <div className="m-5">
+        <span className="large">Version : </span>
+        <Dropdown overlay={menu} className="text-gray-600 small">
+          <span>
+            {version}
+            <DownOutlined />
+          </span>
+        </Dropdown>
+      </div>
       <Tabs
         defaultActiveKey="visit"
         tabBarExtraContent={
           <ExtraContent
-            showedDevice={activeTab !== 'visit'}
+            showedDevice={activeTab !== "visit"}
             setOption={setOption}
             setFrom={setFrom}
             setTo={setTo}
@@ -182,28 +244,28 @@ export const HeatmapTabs = ({
         animated={false}
       >
         <Tabs.TabPane
-          tab={getTabHead('Visits')}
+          tab={getTabHead("Visits")}
           key="visit"
           className="px-4 pb-4"
         >
           <VisitDetail loading={loading} data={visit} />
         </Tabs.TabPane>
         <Tabs.TabPane
-          tab={getTabHead('Clicking')}
+          tab={getTabHead("Clicking")}
           key="clicking"
           className="px-4 pb-4"
         >
           <ClickDetail loading={loading} data={click} imageUrl={imageUrl} />
         </Tabs.TabPane>
         <Tabs.TabPane
-          tab={getTabHead('Hovering')}
+          tab={getTabHead("Hovering")}
           key="hovering"
           className="px-4 pb-4"
         >
           <HoverDetail loading={loading} data={hover} imageUrl={imageUrl} />
         </Tabs.TabPane>
         <Tabs.TabPane
-          tab={getTabHead('Content Reading')}
+          tab={getTabHead("Content Reading")}
           key="scrolling"
           className="px-4 pb-4"
         >

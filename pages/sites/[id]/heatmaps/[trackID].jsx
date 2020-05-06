@@ -28,7 +28,7 @@ const Statistic = ({ id, trackID }) => {
   const [version, setVersion] = useState(null);
   const [emptyData, setEmptyData] = useState(false);
   const typeUrlKey = Object.keys(TYPE_URL).find(
-    (key) => TYPE_URL[key].key === typeUrl,
+    (key) => TYPE_URL[key].key === typeUrl
   );
   const typeUrlDisplay = typeUrlKey ? TYPE_URL[typeUrlKey].display : typeUrl;
 
