@@ -1,28 +1,78 @@
-import { Button, Modal, Input, message, Select } from 'antd';
-import { PlusOutlined, MoreOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import { Button, Modal, Input, message, Select } from "antd";
+import moment from 'moment';
+import { PlusOutlined, MoreOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
-import { FooterModal } from '../../footer-modal';
-import { getAccessToken } from '../../../utils/account-utils';
-import { ROLE } from '../../../common/role';
-import { useAccountContext } from '../../profile/profile-context';
+import { FooterModal } from "../../footer-modal";
+import { getAccessToken } from "../../../utils/account-utils";
+import { ROLE } from "../../../common/role";
+import { useAccountContext } from "../../profile/profile-context";
+import { invited } from "../../../common/query-lib/member/invite";
 
-export const AddMemberWrapper = () => {
+export const AddMemberWrapper = ({ members, setMembers }) => {
   const { setting } = useAccountContext();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [domainURL, setDomainURL] = useState('');
-  const [error, setError] = useState('');
+  const [domainURL, setDomainURL] = useState("");
+  const [error, setError] = useState("");
+  const [role, setRole] = useState(0);
 
   const activeOrganization = setting ? setting.activeOrganization : undefined;
   const userRole = activeOrganization ? activeOrganization.userRole : undefined;
+  const ValidateEmail = (mail) => {
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)) {
+      return true;
+    }
+    return false;
+  };
 
   const handleAddTracking = async () => {
     const token = getAccessToken();
     setLoading(true);
-    setError('');
-    message.info('Nothing happen');
-    setVisible(false);
+    setError("");
+    if (domainURL == "") {
+      setError("Please enter member email");
+      setLoading(false);
+    }
+    else if(!ValidateEmail(domainURL)){
+      setError("Email is wrong format");
+      setLoading(false);
+    }
+    else if (role == 0) {
+      setError("Please select role for new member");
+      setLoading(false);
+    } else {
+      try {
+        setError('');
+        const response = await invited({
+          email: domainURL,
+          organizationID: activeOrganization.organizationID,
+          roleID: role,
+          token,
+        });
+        if (response.status === 200 || response.status === 304) {
+          message.success(`Invite successfully`);
+          //add member
+          const data = response.data;
+          const member = {
+            key: data.userID,
+            fullName: data.fullName,
+            email: data.email,
+            joinAt: moment(data.dayJoin * 1000).format("DD/MM/YYYY"),
+            role: data.role,
+          };
+          setMembers([...members,member]);
+        }
+      } catch (error) {
+        if(error.message.includes('404')){
+          message.info(
+            "Member is not a user. sending invite email successfully."
+          );
+        }else
+        message.error(`Could not invite`);
+      }
+      setVisible(false);
+    }
   };
 
   return (
@@ -46,7 +96,12 @@ export const AddMemberWrapper = () => {
           onChange={(event) => setDomainURL(event.target.value)}
         />
 
-        <Select className="w-full mt-4" size="large" placeholder="Select role">
+        <Select
+          className="w-full mt-4"
+          size="large"
+          placeholder="Select role"
+          onChange={(event) =>setRole(event)}
+        >
           {ROLE.slice(1).map(({ display, value }) => (
             <Select.Option key={`${value}-${display}`} value={value}>
               {display}
